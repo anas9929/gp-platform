@@ -38,3 +38,11 @@ export const SIDEBAR_BREAKPOINT = 1024
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
 export const DEFAULT_PAGE_SIZE = 10
+
+/** بيانات التواصل المعروضة باللاندنج والتذييل */
+export const CONTACT = {
+  EMAIL: 'hello@gradplatform.edu',
+  PHONE: '+000 000 79 962',
+  PHONE_RAW: '+0000007962',
+  ADDRESS: 'عمّان - الأردن'
+}

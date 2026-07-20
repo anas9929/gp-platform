@@ -81,7 +81,14 @@ export default {
         body: 'var(--fs-body)',
         'body-sm': 'var(--fs-body-sm)',
         caption: 'var(--fs-caption)',
-        label: 'var(--fs-label)'
+        label: 'var(--fs-label)',
+        hero: '44px',
+        'hero-sm': '32px',
+        'sec-title': '30px',
+        'sec-title-sm': '26px'
+      },
+      maxWidth: {
+        content: '1180px'
       },
       borderRadius: {
         sm: 'var(--radius-sm)',

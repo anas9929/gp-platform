@@ -70,9 +70,9 @@
           <ul class="space-y-1">
             <li v-for="item in group.items" :key="item.to">
               <router-link
+                v-slot="{ href, navigate, isActive, isExactActive }"
                 :to="item.to"
                 custom
-                v-slot="{ href, navigate, isActive, isExactActive }"
               >
                 <a
                   :href="href"

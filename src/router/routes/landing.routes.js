@@ -12,7 +12,13 @@ export default [
         meta: { title: 'الرئيسية' }
       },
       {
-        path: 'projects/:id',
+        path: 'projects',
+        name: 'projects-archive',
+        component: () => import('@/views/landing/ProjectsArchivePage.vue'),
+        meta: { title: 'أرشيف المشاريع' }
+      },
+      {
+        path: 'projects/:id(\\d+)',
         name: 'project-showcase',
         component: () => import('@/views/landing/ProjectShowcasePage.vue'),
         props: true,

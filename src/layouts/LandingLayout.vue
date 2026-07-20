@@ -1,19 +1,19 @@
 <template>
   <div class="min-h-screen bg-bg flex flex-col">
-    <NavBar />
+    <LandingNavBar />
     <main class="flex-1">
       <router-view />
     </main>
-    <AppFooter />
+    <LandingFooter />
   </div>
 </template>
 
 <script>
-import NavBar from '@/components/landing/NavBar.vue'
-import AppFooter from '@/components/layout/AppFooter.vue'
+import LandingNavBar from '@/components/landing/LandingNavBar.vue'
+import LandingFooter from '@/components/landing/LandingFooter.vue'
 
 export default {
   name: 'LandingLayout',
-  components: { NavBar, AppFooter }
+  components: { LandingNavBar, LandingFooter }
 }
 </script>
