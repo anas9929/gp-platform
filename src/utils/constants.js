@@ -41,8 +41,8 @@ export const DEFAULT_PAGE_SIZE = 10
 
 /** بيانات التواصل المعروضة باللاندنج والتذييل */
 export const CONTACT = {
-  EMAIL: 'hello@gradplatform.edu',
-  PHONE: '+000 000 79 962',
-  PHONE_RAW: '+0000007962',
-  ADDRESS: 'عمّان - الأردن'
+  EMAIL: 'academy@ucas.edu.ps',
+  PHONE: '0597 302 452',
+  PHONE_RAW: '+970597302452',
+  ADDRESS: 'فلسطين - غزة'
 }

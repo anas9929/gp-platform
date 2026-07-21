@@ -33,33 +33,26 @@
         >
       </div>
 
-      <div class="min-w-[180px]">
-        <label for="archive-department" class="block mb-2 text-label font-semibold text-text-700">القسم</label>
-        <select
-          id="archive-department"
+      <div class="min-w-[200px]">
+        <BaseSelect
           v-model="filters.department_id"
-          class="w-full h-icon-btn px-3 rounded-sm border border-border bg-surface text-body text-text-900 cursor-pointer focus:border-primary-600 transition-colors duration-fast"
+          label="القسم"
+          placeholder="جميع الأقسام"
+          include-placeholder-option
+          :options="departmentOptions"
           @change="onFilterChange"
-        >
-          <option value="">كل الأقسام</option>
-          <option v-for="department in departments" :key="department.id" :value="department.id">
-            {{ department.name }}
-          </option>
-        </select>
+        />
       </div>
 
-      <div class="min-w-[150px]">
-        <label for="archive-degree" class="block mb-2 text-label font-semibold text-text-700">الدرجة</label>
-        <select
-          id="archive-degree"
+      <div class="min-w-[170px]">
+        <BaseSelect
           v-model="filters.degree"
-          class="w-full h-icon-btn px-3 rounded-sm border border-border bg-surface text-body text-text-900 cursor-pointer focus:border-primary-600 transition-colors duration-fast"
+          label="الدرجة"
+          placeholder="جميع الدرجات"
+          include-placeholder-option
+          :options="degreeOptions"
           @change="onFilterChange"
-        >
-          <option value="">الكل</option>
-          <option value="دبلوم">دبلوم</option>
-          <option value="بكالوريوس">بكالوريوس</option>
-        </select>
+        />
       </div>
 
       <button
@@ -137,11 +130,12 @@ import { formatNumber } from '@/utils/formatters'
 import ProjectCard from '@/components/landing/ProjectCard.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import AppIcon from '@/components/icons/AppIcon.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
 
 export default {
   name: 'ProjectsArchivePage',
 
-  components: { ProjectCard, Pagination, AppIcon },
+  components: { ProjectCard, Pagination, AppIcon, BaseSelect },
 
   data() {
     return {
@@ -166,6 +160,17 @@ export default {
 
     hasActiveFilters() {
       return Boolean(this.filters.search || this.filters.department_id || this.filters.degree)
+    },
+
+    departmentOptions() {
+      return this.departments.map((department) => ({ value: department.id, label: department.name }))
+    },
+
+    degreeOptions() {
+      return [
+        { value: 'دبلوم', label: 'دبلوم' },
+        { value: 'بكالوريوس', label: 'بكالوريوس' }
+      ]
     }
   },
 

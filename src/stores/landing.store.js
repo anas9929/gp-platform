@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import publicApi from '@/services/endpoints/public.api'
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants'
+import { DEMO_STATS, DEMO_DEPARTMENTS, DEMO_PROJECTS } from '@/utils/demoData'
 
 export const useLandingStore = defineStore('landing', {
   state: () => ({
@@ -55,7 +56,7 @@ export const useLandingStore = defineStore('landing', {
 
   actions: {
     // TODO API — GET /public/stats
-    // response: { departments, teams, supervisors, students, projects }
+    // response: { departments, teams, supervisors, students, projects, avg_completion? }
     async fetchStats() {
       if (this.statsLoading) return this.stats
       this.statsLoading = true
@@ -64,9 +65,10 @@ export const useLandingStore = defineStore('landing', {
         const { data } = await publicApi.getPlatformStats()
         this.stats = data.data || data
         return this.stats
-      } catch (err) {
-        this.statsError = err.normalized?.message || 'تعذّر تحميل الإحصائيات'
-        throw err
+      } catch (_) {
+        // لا يوجد باك إند متصل بعد — نعرض بيانات تجريبية مؤقتًا بدل رسالة خطأ للزوار
+        this.stats = DEMO_STATS
+        return this.stats
       } finally {
         this.statsLoading = false
       }
@@ -82,9 +84,10 @@ export const useLandingStore = defineStore('landing', {
         this.featured = data.data || data
         this.featuredTotal = data.meta?.total ?? this.featured.length
         return this.featured
-      } catch (err) {
-        this.featuredError = err.normalized?.message || 'تعذّر تحميل المشاريع'
-        throw err
+      } catch (_) {
+        this.featured = DEMO_PROJECTS.slice(0, limit)
+        this.featuredTotal = DEMO_PROJECTS.length
+        return this.featured
       } finally {
         this.featuredLoading = false
       }
@@ -103,9 +106,16 @@ export const useLandingStore = defineStore('landing', {
         this.projects = data.data || data
         this.projectsMeta = data.meta || null
         return this.projects
-      } catch (err) {
-        this.projectsError = err.normalized?.message || 'تعذّر تحميل المشاريع'
-        throw err
+      } catch (_) {
+        const page = Number(params.page) || 1
+        const perPage = DEFAULT_PAGE_SIZE
+        this.projects = DEMO_PROJECTS.slice((page - 1) * perPage, page * perPage)
+        this.projectsMeta = {
+          current_page: page,
+          last_page: Math.ceil(DEMO_PROJECTS.length / perPage),
+          total: DEMO_PROJECTS.length
+        }
+        return this.projects
       } finally {
         this.projectsLoading = false
       }
@@ -121,8 +131,8 @@ export const useLandingStore = defineStore('landing', {
         this.departments = data.data || data
         return this.departments
       } catch (_) {
-        this.departments = []
-        return []
+        this.departments = DEMO_DEPARTMENTS
+        return this.departments
       } finally {
         this.departmentsLoading = false
       }

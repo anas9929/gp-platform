@@ -2,7 +2,9 @@
   <div>
     <HeroSection />
     <FeaturedProjects @loaded="observeReveals" />
-    <RolesSection />
+    <div id="features" class="scroll-mt-20">
+      <RolesSection />
+    </div>
     <HowItWorksSection />
     <div id="departments" class="scroll-mt-20">
       <DepartmentsSection @loaded="observeReveals" />

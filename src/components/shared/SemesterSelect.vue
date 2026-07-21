@@ -1,40 +1,38 @@
 <template>
-  <div class="relative">
-    <label class="sr-only" for="semester-select">الفصل الدراسي</label>
-    <select
-      id="semester-select"
-      :value="activeSemesterId"
-      :disabled="semestersLoading || !semesters.length"
-      class="w-full sm:w-auto h-icon-btn ps-3 pe-9 rounded-sm border border-border bg-surface text-body-sm text-text-700 font-medium appearance-none cursor-pointer transition-colors duration-fast hover:border-primary-100 disabled:opacity-60 disabled:cursor-not-allowed"
-      @change="onChange"
-    >
-      <option v-if="semestersLoading" value="">جارٍ التحميل…</option>
-      <option v-else-if="!semesters.length" value="">لا توجد فصول</option>
-      <option v-for="semester in semesters" :key="semester.id" :value="semester.id">
-        {{ semester.name }}
-      </option>
-    </select>
-    <ChevronDown
-      :size="16"
-      class="pointer-events-none absolute top-1/2 -translate-y-1/2 left-3 text-text-400"
-    />
-  </div>
+  <BaseSelect
+    :model-value="activeSemesterId"
+    :options="semesterOptions"
+    :placeholder="selectPlaceholder"
+    :disabled="semestersLoading || !semesters.length"
+    class="w-full sm:w-[220px]"
+    @update:model-value="onChange"
+  />
 </template>
 
 <script>
 import { mapState, mapActions } from 'pinia'
-import { ChevronDown } from 'lucide-vue-next'
 import { useUiStore } from '@/stores/ui.store'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
 
 export default {
   name: 'SemesterSelect',
 
-  components: { ChevronDown },
+  components: { BaseSelect },
 
   emits: ['change'],
 
   computed: {
-    ...mapState(useUiStore, ['semesters', 'activeSemesterId', 'semestersLoading'])
+    ...mapState(useUiStore, ['semesters', 'activeSemesterId', 'semestersLoading']),
+
+    semesterOptions() {
+      return this.semesters.map((semester) => ({ value: semester.id, label: semester.name }))
+    },
+
+    selectPlaceholder() {
+      if (this.semestersLoading) return 'جارٍ التحميل…'
+      if (!this.semesters.length) return 'لا توجد فصول'
+      return 'اختاري الفصل'
+    }
   },
 
   created() {
@@ -47,11 +45,11 @@ export default {
   methods: {
     ...mapActions(useUiStore, ['fetchSemesters', 'setActiveSemester']),
 
-    onChange(event) {
-      this.setActiveSemester(event.target.value)
-      this.$emit('change', event.target.value)
+    onChange(value) {
+      this.setActiveSemester(value)
+      this.$emit('change', value)
       // تغيير الفصل يعيد تحميل بيانات الصفحة الحالية
-      this.$router.replace({ query: { ...this.$route.query, _s: event.target.value } })
+      this.$router.replace({ query: { ...this.$route.query, _s: value } })
     }
   }
 }

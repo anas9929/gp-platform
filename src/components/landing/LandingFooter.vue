@@ -9,7 +9,7 @@
           <span class="font-cairo font-extrabold text-[14.5px] text-white">منصة إدارة مشاريع التخرج</span>
         </router-link>
         <p class="max-w-[300px] text-[12.5px] leading-[1.9]">
-          منصة متخصصة لإدارة مشاريع التخرج لأقسام البرمجيات والوسائط، بتصميم أنيق وتجربة عربية سلسة.
+          منصة متقدمة لإدارة ومتابعة مشاريع التخرج في تخصصات البرمجيات والوسائط، تقدم تجربة استخدام عربية احترافية بواجهة حديثة.
         </p>
       </div>
 
@@ -20,13 +20,13 @@
             <router-link :to="{ name: 'login' }" class="hover:text-white transition-colors duration-fast">تسجيل الدخول</router-link>
           </li>
           <li>
-            <router-link :to="{ name: 'projects-archive' }" class="hover:text-white transition-colors duration-fast">أفضل المشاريع</router-link>
+            <router-link :to="{ name: 'projects-archive' }" class="hover:text-white transition-colors duration-fast">المشاريع</router-link>
+          </li>
+          <li>
+            <router-link :to="{ name: 'landing', hash: '#features' }" class="hover:text-white transition-colors duration-fast">الميزات</router-link>
           </li>
           <li>
             <router-link :to="{ name: 'landing', hash: '#departments' }" class="hover:text-white transition-colors duration-fast">الأقسام</router-link>
-          </li>
-          <li>
-            <a :href="`mailto:${contact.EMAIL}`" class="hover:text-white transition-colors duration-fast">تواصل معنا</a>
           </li>
         </ul>
       </div>
