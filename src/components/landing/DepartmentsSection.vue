@@ -17,7 +17,8 @@
         </div>
       </div>
 
-      <!-- فارغ -->
+      <!-- خطأ / فارغ -->
+      <p v-else-if="departmentsError" class="text-center text-body-sm text-text-400 py-8">{{ departmentsError }}</p>
       <p v-else-if="!departments.length" class="text-center text-body-sm text-text-400 py-8">
         لم تُضَف الأقسام بعد.
       </p>
@@ -66,7 +67,7 @@ export default {
   emits: ['loaded'],
 
   computed: {
-    ...mapState(useLandingStore, ['departments', 'departmentsLoading'])
+    ...mapState(useLandingStore, ['departments', 'departmentsLoading', 'departmentsError'])
   },
 
   created() {

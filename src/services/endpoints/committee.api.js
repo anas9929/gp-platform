@@ -1,84 +1,62 @@
 import api from '@/services/api'
 
 /**
- * كل نداءات لوحة لجنة الإشراف.
- * شكل الاستجابة والبيانات موثّق بالكامل في API_REFERENCE.md بجذر المشروع.
+ * نداءات لوحة لجنة الإشراف — مطابقة لعقد الباك إند الفعلي (راجعي docs/api-reference.html).
+ * الباك إند غير مقسّم بمسارات لكل دور (لا يوجد بادئة /committee/*) — كل الموارد
+ * عامة الشكل (teams, discussions, proposals) وتُستهلك بنفس الشكل من كل الأدوار
+ * المخوّلة، والباك إند نفسه يقرر الصلاحية حسب دور المستخدم المسجّل دخوله.
+ *
+ * ⚠️ لا يوجد بهذا الباك إند حاليًا: إحصائيات لوحة تحكم مجمّعة، إدارة مستخدمين
+ * عامة (إنشاء مشرف/عضو لجنة)، تعديل/حذف فريق أو عضو فريق، تعديل/حذف موعد مناقشة،
+ * تمييز مشروع بنجمة، أو أي مفهوم "مشروع مكتمل/أرشيف" فعلي. راجعي API_REFERENCE.md
+ * لتفاصيل كل فجوة والبديل المؤقت المستخدم بكل صفحة.
  */
 export default {
-  /* ---------- لوحة التحكم ---------- */
-  // GET /committee/dashboard/stats?semester_id=
-  getDashboardStats: (params) => api.get('/committee/dashboard/stats', { params }),
+  /* ---------- الفرق ---------- */
+  // GET /teams?term_id= → كل الفرق بالفصل الحالي مع المشرف/القائد/الأعضاء/المشروع
+  getTeams: (params) => api.get('/teams', { params }),
+  // GET /teams/:id
+  getTeam: (id) => api.get(`/teams/${id}`),
+  // POST /teams  body: { name, supervisor_id, specialization_id, member_ids: number[], leader_id }
+  // leader_id يجب أن يكون ضمن member_ids، وأقصى عدد أعضاء 4
+  createTeam: (payload) => api.post('/teams', payload),
 
-  /* ---------- الفرق (المجموعات) ---------- */
-  // GET /committee/groups?semester_id=&search=
-  getGroups: (params) => api.get('/committee/groups', { params }),
-  // POST /committee/groups
-  createGroup: (payload) => api.post('/committee/groups', payload),
-  // PUT /committee/groups/:id
-  updateGroup: (id, payload) => api.put(`/committee/groups/${id}`, payload),
-  // DELETE /committee/groups/:id
-  deleteGroup: (id) => api.delete(`/committee/groups/${id}`),
-  // POST /committee/groups/:id/members
-  addGroupMember: (groupId, payload) => api.post(`/committee/groups/${groupId}/members`, payload),
-  // PUT /committee/groups/:id/members/:memberId
-  updateGroupMember: (groupId, memberId, payload) => api.put(`/committee/groups/${groupId}/members/${memberId}`, payload),
-  // DELETE /committee/groups/:id/members/:memberId
-  deleteGroupMember: (groupId, memberId) => api.delete(`/committee/groups/${groupId}/members/${memberId}`),
-  // POST /committee/groups/import  body: FormData{ file }
-  importGroups: (formData) => api.post('/committee/groups/import', formData),
+  /* ---------- استيراد الطلاب بالجملة (خطوتان: معاينة ثم تأكيد) ---------- */
+  // POST /teams/import/preview  body: FormData{ file } → { valid: [...], invalid: [{row,data,errors}] }
+  previewTeamsImport: (formData) => api.post('/teams/import/preview', formData),
+  // POST /teams/import/confirm  body: { specialization_id, rows: [...] }
+  // → { valid: [], invalid: [], created: [{ user, invite_token }] }
+  confirmTeamsImport: (payload) => api.post('/teams/import/confirm', payload),
 
-  /* ---------- الأعضاء (طلاب ومشرفون) ---------- */
-  // GET /committee/students?search=&specialization=&supervisor_id=
-  getStudents: (params) => api.get('/committee/students', { params }),
-  // PUT /committee/students/:id
-  updateStudent: (id, payload) => api.put(`/committee/students/${id}`, payload),
-  // PATCH /committee/students/:id/restrict  body: { restricted }
-  restrictStudent: (id, restricted) => api.patch(`/committee/students/${id}/restrict`, { restricted }),
+  /* ---------- نسبة تقدّم الفرق ---------- */
+  // GET /teams/:id/progress → { total, done, percentage }  — طلب واحد لكل فريق، لا يوجد نسخة جماعية
+  getTeamProgress: (teamId) => api.get(`/teams/${teamId}/progress`),
+  // GET /progress/export → ملف xlsx مباشر (كل الفرق دفعة واحدة)
+  exportProgress: () => api.get('/progress/export', { responseType: 'blob' }),
 
-  // GET /committee/supervisors?search=
-  getSupervisors: (params) => api.get('/committee/supervisors', { params }),
-  // POST /committee/supervisors
-  createSupervisor: (payload) => api.post('/committee/supervisors', payload),
-  // PUT /committee/supervisors/:id
-  updateSupervisor: (id, payload) => api.put(`/committee/supervisors/${id}`, payload),
-  // PATCH /committee/supervisors/:id/restrict  body: { restricted }
-  restrictSupervisor: (id, restricted) => api.patch(`/committee/supervisors/${id}/restrict`, { restricted }),
+  /* ---------- مواعيد المناقشات (Discussions) ---------- */
+  // GET /discussions?department_id=&specialization_id= → مصفوفة مباشرة (بدون pagination)
+  getDiscussions: (params) => api.get('/discussions', { params }),
+  // GET /discussions/export → ملف discussions.xlsx مباشر
+  exportDiscussions: () => api.get('/discussions/export', { responseType: 'blob' }),
+  // POST /discussions
+  // body: { project_id, supervisor_id, place, discussion_date, discussion_time, committee, whatsapp, status }
+  // whatsapp يجب أن يبدأ بـ 970 أو 972
+  createDiscussion: (payload) => api.post('/discussions', payload),
 
   /* ---------- المقترحات ---------- */
-  // GET /committee/proposals?search=&specialization=&status=
-  getProposals: (params) => api.get('/committee/proposals', { params }),
-  // POST /committee/proposals/:id/approve
-  approveProposal: (id) => api.post(`/committee/proposals/${id}/approve`),
-  // POST /committee/proposals/:id/reject  body: { reason }
-  rejectProposal: (id, reason) => api.post(`/committee/proposals/${id}/reject`, { reason }),
+  // POST /proposals/:id/approve  بدون body
+  approveProposal: (id) => api.post(`/proposals/${id}/approve`),
+  // POST /proposals/:id/reject  body: { rejection_reason }
+  rejectProposal: (id, rejectionReason) => api.post(`/proposals/${id}/reject`, { rejection_reason: rejectionReason }),
 
-  /* ---------- مواعيد المناقشات ---------- */
-  // GET /committee/appointments?search=&department_id=&specialization=
-  getAppointments: (params) => api.get('/committee/appointments', { params }),
-  // POST /committee/appointments
-  createAppointment: (payload) => api.post('/committee/appointments', payload),
-  // PUT /committee/appointments/:id
-  updateAppointment: (id, payload) => api.put(`/committee/appointments/${id}`, payload),
-  // DELETE /committee/appointments/:id
-  deleteAppointment: (id) => api.delete(`/committee/appointments/${id}`),
-  // POST /committee/appointments/:id/students
-  addAppointmentStudent: (id, payload) => api.post(`/committee/appointments/${id}/students`, payload),
-  // PUT /committee/appointments/:id/students/:studentId
-  updateAppointmentStudent: (id, studentId, payload) => api.put(`/committee/appointments/${id}/students/${studentId}`, payload),
-  // DELETE /committee/appointments/:id/students/:studentId
-  deleteAppointmentStudent: (id, studentId) => api.delete(`/committee/appointments/${id}/students/${studentId}`),
-  // POST /committee/appointments/import  body: FormData{ file }
-  importAppointments: (formData) => api.post('/committee/appointments/import', formData),
+  /* ---------- دعوة عضو موجود (إرسال/إعادة إرسال رابط تعيين كلمة مرور) ---------- */
+  // POST /users/:id/invite → { token, expires_at } — لا يُنشئ مستخدمًا، فقط يرسل رابط لعضو id موجود سلفًا
+  inviteUser: (userId) => api.post(`/users/${userId}/invite`),
 
-  /* ---------- أرشيف المشاريع ---------- */
-  // GET /committee/projects/archive?search=&department_id=
-  getArchivedProjects: (params) => api.get('/committee/projects/archive', { params }),
-  // GET /committee/projects/:id  → { data: Project + description + files: [{ name, type, url }] }
-  getProjectDetail: (id) => api.get(`/committee/projects/${id}`),
-  // PATCH /committee/projects/:id/star  body: { starred }
-  starProject: (id, starred) => api.patch(`/committee/projects/${id}/star`, { starred }),
-
-  /* ---------- نسبة تقدّم المشاريع ---------- */
-  // GET /committee/projects/progress?search=&specialization=&supervisor_id=&status=
-  getProjectsProgress: (params) => api.get('/committee/projects/progress', { params })
+  /* ---------- قوائم مرجعية للفلاتر (تتطلب تسجيل دخول) ---------- */
+  // GET /departments
+  getDepartments: () => api.get('/departments'),
+  // GET /specializations
+  getSpecializations: () => api.get('/specializations')
 }

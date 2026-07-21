@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { LayoutDashboard, ClipboardList, Users, FileCheck } from 'lucide-vue-next'
+import { LayoutDashboard, ClipboardList, Users, User, FileCheck, CalendarClock, TrendingUp } from 'lucide-vue-next'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import AppTopbar from '@/components/layout/AppTopbar.vue'
 
@@ -37,8 +37,13 @@ export default {
        * الشكل: { label, to, icon, exact } أو مجموعات { title, items: [] }
        */
       navItems: [
-        { label: 'لوحة المعلومات', to: '/committee', icon: LayoutDashboard, exact: true }
-        // تُضاف بقية العناصر مع كل صفحة تُوصف
+        { label: 'لوحة المعلومات', to: '/committee', icon: LayoutDashboard, exact: true },
+        { label: 'الفرق', to: '/committee/teams', icon: Users },
+        { label: 'الأعضاء', to: '/committee/members', icon: User },
+        { label: 'المقترحات', to: '/committee/proposals', icon: ClipboardList },
+        { label: 'مواعيد المناقشات', to: '/committee/appointments', icon: CalendarClock },
+        { label: 'أرشيف المشاريع', to: '/committee/project-archive', icon: FileCheck },
+        { label: 'نسبة تقدّم المشاريع', to: '/committee/progress', icon: TrendingUp }
       ]
     }
   }

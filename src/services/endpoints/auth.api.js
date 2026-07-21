@@ -1,26 +1,27 @@
 import api from '@/services/api'
 
 /**
- * كل نداءات المصادقة.
- * المسارات مبدئية — تُعدَّل عند تثبيت عقد الـ API النهائي.
+ * نداءات المصادقة — مطابقة لعقد الباك إند الفعلي (docs/api-reference.html).
+ * لا يوجد "نسيت كلمة المرور" ذاتي الخدمة بهذا الباك إند: كلمات المرور لا تُرسل
+ * أبدًا صراحة، فقط روابط دعوة لمرة واحدة (invite/accept) يحددها المستخدم بنفسه.
  */
 export default {
-  // POST /auth/login  body: { email, password, remember }
-  // response: { token, user: { id, name, email, role, ... } }
-  login: (payload) => api.post('/auth/login', payload),
+  // POST /login  body: { email, password }
+  // response: { user: { id, name, email, role, whatsapp, university_number,
+  //                      specialization_id, term_id, status, must_change_password }, token }
+  login: (payload) => api.post('/login', payload),
 
-  // POST /auth/logout
-  logout: () => api.post('/auth/logout'),
+  // POST /logout
+  logout: () => api.post('/logout'),
 
-  // GET /auth/me → المستخدم الحالي (تُستخدم لاستعادة الجلسة عند إعادة التحميل)
-  me: () => api.get('/auth/me'),
+  // GET /me → المستخدم الحالي (استعادة الجلسة عند إعادة التحميل)
+  me: () => api.get('/me'),
 
-  // POST /auth/forgot-password  body: { email }
-  forgotPassword: (payload) => api.post('/auth/forgot-password', payload),
+  // POST /me/change-password  body: { current_password, password, password_confirmation }
+  // معفى من بوابة 423 (يجب أن يعمل حتى إذا كان must_change_password: true)
+  changePassword: (payload) => api.post('/me/change-password', payload),
 
-  // POST /auth/reset-password  body: { token, email, password, password_confirmation }
-  resetPassword: (payload) => api.post('/auth/reset-password', payload),
-
-  // POST /auth/change-password  body: { current_password, password, password_confirmation }
-  changePassword: (payload) => api.post('/auth/change-password', payload)
+  // POST /invite/{token}/accept  body: { password, password_confirmation }
+  // يُستخدم لأول تسجيل دخول بعد استيراد/دعوة — الرابط صالح لمرة واحدة، 3 أيام
+  acceptInvite: (token, payload) => api.post(`/invite/${token}/accept`, payload)
 }

@@ -41,8 +41,8 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem(STORAGE_KEYS.USER)
     },
 
-    // TODO API — POST /auth/login | body: { email, password, remember }
-    // response: { token: string, user: { id, name, email, role } }
+    // POST /login | body: { email, password }
+    // response: { user: { id, name, email, role, must_change_password, ... }, token }
     async login(credentials) {
       this.isLoading = true
       this.error = null
@@ -60,7 +60,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // TODO API — POST /auth/logout | response: 204
+    // POST /logout
     async logout() {
       try {
         await authApi.logout()
@@ -71,7 +71,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // TODO API — GET /auth/me | response: { user }
+    // GET /me | response: { user }
     /** استعادة الجلسة عند إعادة تحميل الصفحة */
     async fetchCurrentUser() {
       if (!this.token) return null
@@ -87,13 +87,13 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // TODO API — POST /auth/forgot-password | body: { email } | response: { message }
-    async forgotPassword(payload) {
+    // POST /me/change-password | body: { current_password, password, password_confirmation }
+    async changePassword(payload) {
       this.isLoading = true
       this.error = null
       this.fieldErrors = {}
       try {
-        const { data } = await authApi.forgotPassword(payload)
+        const { data } = await authApi.changePassword(payload)
         return data
       } catch (err) {
         this.error = err.normalized?.message
@@ -104,14 +104,13 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // TODO API — POST /auth/reset-password
-    // body: { token, email, password, password_confirmation } | response: { message }
-    async resetPassword(payload) {
+    // POST /invite/{token}/accept | body: { password, password_confirmation }
+    async acceptInvite(token, payload) {
       this.isLoading = true
       this.error = null
       this.fieldErrors = {}
       try {
-        const { data } = await authApi.resetPassword(payload)
+        const { data } = await authApi.acceptInvite(token, payload)
         return data
       } catch (err) {
         this.error = err.normalized?.message
@@ -120,6 +119,18 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.isLoading = false
       }
+    },
+
+    /**
+     * لا يوجد "نسيت كلمة المرور" ذاتي الخدمة بهذا الباك إند (راجع docs/api-reference.html
+     * قسم 9 — "أخبار جيدة": كلمات المرور تُدار حصرًا عبر روابط دعوة لمرة واحدة).
+     * تُبقى هذه الدالة لتفادي كسر ForgotPasswordPage.vue الحالية، لكنها ترفض دومًا
+     * برسالة صريحة بدل مناداة endpoint غير موجود.
+     */
+    async forgotPassword() {
+      const message = 'استعادة كلمة المرور غير متاحة حاليًا — تواصلي مع لجنة الإشراف لإرسال رابط دعوة جديد'
+      this.error = message
+      throw Object.assign(new Error(message), { normalized: { status: 0, message, errors: {} } })
     }
   }
 })

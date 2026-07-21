@@ -22,10 +22,11 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    // الفصل الدراسي النشط يُرسل مع كل طلب ليفلتر الباك إند بياناته
-    const semester = localStorage.getItem(STORAGE_KEYS.SEMESTER)
-    if (semester) {
-      config.headers['X-Semester-Id'] = semester
+    // الفصل الدراسي: يُرسل كـ ?term_id= فقط إن كان محددًا صراحة — بدونه الباك إند
+    // يفترض تلقائيًا الفصل الحالي (is_current: true)، فلا داعي لإرساله دائمًا
+    const term = localStorage.getItem(STORAGE_KEYS.SEMESTER)
+    if (term && !(config.params && 'term_id' in config.params)) {
+      config.params = { ...config.params, term_id: term }
     }
     // FormData يحدد Content-Type بنفسه (boundary)
     if (config.data instanceof FormData) {
@@ -55,6 +56,10 @@ api.interceptors.response.use(
       message = 'المورد المطلوب غير موجود'
     } else if (status === 422) {
       message = data?.message || 'تحقّقي من البيانات المدخلة'
+    } else if (status === 423) {
+      message = data?.message || 'يجب تغيير كلمة المرور أولاً'
+    } else if (status === 429) {
+      message = 'محاولات كثيرة جدًا، حاولي بعد قليل'
     } else if (status >= 500) {
       message = 'خطأ في الخادم، حاولي لاحقًا'
     } else if (data?.message) {
@@ -65,7 +70,9 @@ api.interceptors.response.use(
       status: status || 0,
       message,
       // أخطاء التحقق لكل حقل: { email: ['...'], password: ['...'] }
-      errors: data?.errors || {}
+      errors: data?.errors || {},
+      // 423: الحساب لازم يغيّر كلمة المرور قبل أي طلب آخر (عدا /logout و /me/change-password)
+      mustChangePassword: status === 423
     }
 
     // 401 → تنظيف الجلسة وإعادة التوجيه لصفحة الدخول (مرة واحدة فقط)

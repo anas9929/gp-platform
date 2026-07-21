@@ -110,17 +110,14 @@ export default {
   computed: {
     ...mapState(useAuthStore, { authError: 'error', isLoading: 'isLoading' }),
 
-    /** يصلان برابط إعادة التعيين المُرسَل بالبريد */
+    /** يصل برابط الدعوة لمرة واحدة (invite token) */
     resetToken() {
       return String(this.$route.query.token || '')
-    },
-    resetEmail() {
-      return String(this.$route.query.email || '')
     }
   },
 
   methods: {
-    ...mapActions(useAuthStore, ['resetPassword']),
+    ...mapActions(useAuthStore, ['acceptInvite']),
 
     validatePassword() {
       this.errors.password = required(this.form.password, 'كلمة المرور') || strongPassword(this.form.password)
@@ -140,16 +137,12 @@ export default {
       return passwordOk && confirmationOk
     },
 
-    // TODO API — POST /auth/reset-password | body: { token, email, password, password_confirmation }
+    // POST /invite/{token}/accept | body: { password, password_confirmation }
     async handleSubmit() {
       if (!this.validate()) return
 
       try {
-        await this.resetPassword({
-          token: this.resetToken,
-          email: this.resetEmail,
-          ...this.form
-        })
+        await this.acceptInvite(this.resetToken, { ...this.form })
         this.submitted = true
       } catch (err) {
         const fieldErrors = err.normalized?.errors || {}

@@ -1,30 +1,39 @@
 import { defineStore } from 'pinia'
 import publicApi from '@/services/endpoints/public.api'
-import { DEFAULT_PAGE_SIZE } from '@/utils/constants'
-import { DEMO_STATS, DEMO_DEPARTMENTS, DEMO_PROJECTS } from '@/utils/demoData'
+
+/**
+ * لا توجد بيانات وهمية بهذا الـ store. /projects/featured هو المسار العام
+ * الحقيقي الوحيد المتاح (راجعي docs/api-reference.html). الإحصائيات، تصفح
+ * كل المشاريع بترقيم صفحات، والأقسام — لا يوجد لها API عام حاليًا، فتُضبط
+ * حالة خطأ صريحة فورًا بدل مناداة endpoint غير موجود أو عرض أرقام مصطنعة.
+ */
+const NO_PUBLIC_STATS_API = 'إحصائيات المنصة العامة غير متوفرة بالباك إند الحالي'
+const NO_PUBLIC_DEPARTMENTS_API = 'قائمة الأقسام العامة غير متوفرة بالباك إند الحالي (يتطلب المسار الحقيقي تسجيل دخول)'
+const NO_PUBLIC_ARCHIVE_API = 'تصفح كل المشاريع بترقيم صفحات وفلاتر غير متوفر بالباك إند الحالي — المتاح فقط أفضل 6 مشاريع'
 
 export const useLandingStore = defineStore('landing', {
   state: () => ({
-    /* إحصائيات المنصة */
+    /* إحصائيات المنصة — لا يوجد API عام لها */
     stats: null,
     statsLoading: false,
     statsError: null,
 
-    /* أفضل المشاريع (اللاندنج) */
+    /* أفضل المشاريع (اللاندنج) — GET /projects/featured، حقيقي */
     featured: [],
     featuredTotal: 0,
     featuredLoading: false,
     featuredError: null,
 
-    /* أرشيف المشاريع (صفحة مستقلة) */
+    /* أرشيف المشاريع (صفحة مستقلة) — لا يوجد API عام لتصفح كل المشاريع */
     projects: [],
     projectsMeta: null,
     projectsLoading: false,
     projectsError: null,
 
-    /* الأقسام — تُستخدم كفلاتر بالأرشيف */
+    /* الأقسام — لا يوجد API عام لها */
     departments: [],
-    departmentsLoading: false
+    departmentsLoading: false,
+    departmentsError: null
   }),
 
   getters: {
@@ -55,87 +64,43 @@ export const useLandingStore = defineStore('landing', {
   },
 
   actions: {
-    // TODO API — GET /public/stats
-    // response: { departments, teams, supervisors, students, projects, avg_completion? }
+    /** لا يوجد endpoint عام للإحصائيات — تُضبط حالة الفجوة فورًا بدل نداء وهمي */
     async fetchStats() {
-      if (this.statsLoading) return this.stats
-      this.statsLoading = true
-      this.statsError = null
-      try {
-        const { data } = await publicApi.getPlatformStats()
-        this.stats = data.data || data
-        return this.stats
-      } catch (_) {
-        // لا يوجد باك إند متصل بعد — نعرض بيانات تجريبية مؤقتًا بدل رسالة خطأ للزوار
-        this.stats = DEMO_STATS
-        return this.stats
-      } finally {
-        this.statsLoading = false
-      }
+      this.statsError = NO_PUBLIC_STATS_API
+      this.stats = null
+      return null
     },
 
-    // TODO API — GET /public/projects/featured?limit=6
-    // response: { data: [Project], meta: { total } }
-    async fetchFeaturedProjects(limit = 6) {
+    // GET /projects/featured → { data: [Project], total, current_page, last_page, per_page }
+    async fetchFeaturedProjects() {
       this.featuredLoading = true
       this.featuredError = null
       try {
-        const { data } = await publicApi.getFeaturedProjects({ limit })
+        const { data } = await publicApi.getFeaturedProjects()
         this.featured = data.data || data
-        this.featuredTotal = data.meta?.total ?? this.featured.length
+        this.featuredTotal = data.total ?? this.featured.length
         return this.featured
-      } catch (_) {
-        this.featured = DEMO_PROJECTS.slice(0, limit)
-        this.featuredTotal = DEMO_PROJECTS.length
-        return this.featured
+      } catch (err) {
+        this.featuredError = err.normalized?.message || 'تعذّر تحميل المشاريع المميزة'
+        throw err
       } finally {
         this.featuredLoading = false
       }
     },
 
-    // TODO API — GET /public/projects?page&per_page&search&department_id&degree
-    // response: { data: [Project], meta: { current_page, last_page, total } }
-    async fetchProjects(params = {}) {
-      this.projectsLoading = true
-      this.projectsError = null
-      try {
-        const { data } = await publicApi.getProjects({
-          per_page: DEFAULT_PAGE_SIZE,
-          ...params
-        })
-        this.projects = data.data || data
-        this.projectsMeta = data.meta || null
-        return this.projects
-      } catch (_) {
-        const page = Number(params.page) || 1
-        const perPage = DEFAULT_PAGE_SIZE
-        this.projects = DEMO_PROJECTS.slice((page - 1) * perPage, page * perPage)
-        this.projectsMeta = {
-          current_page: page,
-          last_page: Math.ceil(DEMO_PROJECTS.length / perPage),
-          total: DEMO_PROJECTS.length
-        }
-        return this.projects
-      } finally {
-        this.projectsLoading = false
-      }
+    /** لا يوجد endpoint عام لتصفح كل المشاريع بترقيم صفحات — تُضبط حالة الفجوة فورًا */
+    async fetchProjects() {
+      this.projectsError = NO_PUBLIC_ARCHIVE_API
+      this.projects = []
+      this.projectsMeta = null
+      return []
     },
 
-    // TODO API — GET /public/departments
-    // response: { data: [{ id, name, programs: [{ id, name, degree }] }] }
+    /** لا يوجد endpoint عام للأقسام — تُضبط حالة الفجوة فورًا */
     async fetchDepartments() {
-      if (this.departments.length) return this.departments
-      this.departmentsLoading = true
-      try {
-        const { data } = await publicApi.getDepartments()
-        this.departments = data.data || data
-        return this.departments
-      } catch (_) {
-        this.departments = DEMO_DEPARTMENTS
-        return this.departments
-      } finally {
-        this.departmentsLoading = false
-      }
+      this.departmentsError = NO_PUBLIC_DEPARTMENTS_API
+      this.departments = []
+      return []
     }
   }
 })
