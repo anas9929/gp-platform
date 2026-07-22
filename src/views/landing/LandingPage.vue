@@ -7,7 +7,7 @@
     </div>
     <HowItWorksSection />
     <div id="departments" class="scroll-mt-20">
-      <DepartmentsSection @loaded="observeReveals" />
+      <DepartmentsSection />
     </div>
     <StatsBanner />
     <CtaSection />
@@ -43,8 +43,7 @@ export default {
   mixins: [animateOnScrollMixin],
 
   created() {
-    // TODO API — GET /public/stats
-    // تُجلب مرة واحدة وتُستخدم في الهيرو وشريط الإحصائيات معًا
+    // فجوة باك إند: لا يوجد GET /stats عام — تُستدعى مرة واحدة، الهيرو وشريط الإحصائيات يعرضان "—"
     this.fetchStats().catch(() => {})
   },
 

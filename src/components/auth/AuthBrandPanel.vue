@@ -70,7 +70,7 @@ export default {
   },
 
   created() {
-    // TODO API — GET /public/stats
+    // فجوة باك إند: لا يوجد GET /stats عام — القيم تظهر "—" (راجعي API_REFERENCE.md)
     this.fetchStats().catch(() => {})
   },
 

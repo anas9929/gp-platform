@@ -194,8 +194,7 @@ export default {
     ...mapActions(useLandingStore, ['fetchProjects', 'fetchDepartments']),
     formatNumber,
 
-    // TODO API — GET /public/projects?page&per_page&search&department_id&degree
-    // response: { data: [Project], meta: { current_page, last_page, total } }
+    // فجوة باك إند: لا يوجد GET /projects عام بترقيم صفحات/فلاتر — fetchProjects تضبط projectsError فورًا
     async loadProjects() {
       try {
         await this.fetchProjects({ page: this.page, ...this.cleanFilters() })

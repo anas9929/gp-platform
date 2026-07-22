@@ -119,18 +119,6 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.isLoading = false
       }
-    },
-
-    /**
-     * لا يوجد "نسيت كلمة المرور" ذاتي الخدمة بهذا الباك إند (راجع docs/api-reference.html
-     * قسم 9 — "أخبار جيدة": كلمات المرور تُدار حصرًا عبر روابط دعوة لمرة واحدة).
-     * تُبقى هذه الدالة لتفادي كسر ForgotPasswordPage.vue الحالية، لكنها ترفض دومًا
-     * برسالة صريحة بدل مناداة endpoint غير موجود.
-     */
-    async forgotPassword() {
-      const message = 'استعادة كلمة المرور غير متاحة حاليًا — تواصلي مع لجنة الإشراف لإرسال رابط دعوة جديد'
-      this.error = message
-      throw Object.assign(new Error(message), { normalized: { status: 0, message, errors: {} } })
     }
   }
 })

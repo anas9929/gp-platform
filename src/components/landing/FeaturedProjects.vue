@@ -92,7 +92,7 @@ export default {
   methods: {
     ...mapActions(useLandingStore, ['fetchFeaturedProjects']),
 
-    // TODO API — GET /public/projects/featured?limit=6
+    // GET /projects/featured — عام حقيقي، بدون تسجيل دخول (راجعي API_REFERENCE.md)
     async loadProjects() {
       try {
         await this.fetchFeaturedProjects(6)

@@ -126,7 +126,7 @@ export default {
       return emailOk && passwordOk
     },
 
-    // TODO API — POST /auth/login | body: { email, password, remember }
+    // POST /login | body: { email, password } — remember محلي فقط (الباك إند لا يفرّق بينهما)
     async handleSubmit() {
       if (!this.validate()) return
 

@@ -43,8 +43,7 @@ export default {
     ...mapActions(useLandingStore, ['fetchStats']),
     formatNumber,
 
-    // TODO API — GET /public/stats
-    // response: { departments, teams, supervisors, students, projects }
+    // فجوة باك إند: لا يوجد GET /stats عام — fetchStats تضبط statsError فورًا (راجعي API_REFERENCE.md)
     async loadStats() {
       try {
         await this.fetchStats()
